@@ -1,0 +1,753 @@
+#include <iostream>
+#include<string>
+#include<windows.h>
+#include<fstream>
+using namespace std;
+
+bool choices(char temp);
+char projectInterface(); // prototype
+class helpingFunctions // contain-all necessary functions that help to implement logics
+{
+     protected:
+         void DisplayColumns(string tableName)
+         {
+             
+             
+         }
+
+
+         void copyInVariable5(string arr[],string& r,string& r2,string& r3,string& r4,string& r5)
+         {
+             r =  arr[0];
+             r2 = arr[1];
+             r3 = arr[2];
+             r4 = arr[3];
+             r5 = arr[4];
+         }
+
+         void copyInVariable5(string arr[], string& r, string& r2, string& r3, string& r4)
+         {
+             r = arr[0];
+             r2 = arr[1];
+             r3 = arr[2];
+             r4 = arr[3];
+         }
+
+         void copyInVariable5(string arr[], string& r, string& r2, string& r3)
+         {
+             r = arr[0];
+             r2 = arr[1];
+             r3 = arr[2];
+         }
+
+         void copyInVariable2(string arr[], string& r, string& r2)
+         {
+             r = arr[0];
+             r2 = arr[1];
+         }
+
+
+         void replacingNullFromValueToEnd(string field[], int size) // table = 5 column 3 entred and remaning 2 repace with null
+         {
+             for (int i = 0; i < 5; i++)
+             {
+                 if (i >= size)
+                 {
+                     field[i] = "NULL";
+                 }
+             }
+         }
+
+
+     void extractTableAttributes(string query, string attributes[]) // extract table columns name and save them in array
+     {
+             int i = 0;
+             while (query[i] != '(')
+             {
+                 i++;
+             }
+             ++i; // move to character
+             int j = 0;
+             while (query[i] != ')')
+             {
+                 if (query[i] != ' ' && query[i] != ',')
+                 {
+                     attributes[j].push_back(query[i]);
+                 }
+                 else if (query[i] == ',')
+                 {
+                     j++;
+                 }
+                 i++;
+             }
+
+     }
+
+
+     bool createDB(int count, string tableName)//create file
+     {
+             tableName;
+             fstream create;
+             tableName += ".dat";
+             create.open(tableName, ios::in | ios::out | ios::binary | ios::app);
+             if (create.is_open())
+             {
+                 create.close();
+                 return true;
+             }
+             else
+             {
+                 create.close();
+                 return false;
+             }
+     }
+
+
+     void insertTablePannel()//interface for insertion of table
+     {
+             cout << "\t\t\t\t\t   ---------------------------------" << endl << endl;
+             cout << "\t\t\t\t\t        _____INSERT-INTO-TABLE_____" << endl << endl;
+             cout << "\t\t\t\t\t   ---------------------------------" << endl;
+     }
+
+
+     void createTablePannel()//interface for creation of table
+     {
+             cout << "\t\t\t\t\t   ---------------------------------" << endl << endl;
+             cout << "\t\t\t\t\t\t_____CREATE-TABLE_____" << endl << endl;
+             cout << "\t\t\t\t\t   ---------------------------------" << endl;
+     }
+
+
+     void displayFields(string arr[], int size) // display name of columns that are just extracted
+         {
+
+             for (int i = 0; i < size; i++)
+             {
+                 cout << arr[i] << "  ";
+
+             }
+     }
+
+
+     int extractColumCount(string fileName) // get file name and tells how many column does file have
+     {
+         ifstream check;
+         check.open(fileName, ios::in);
+         int columnCount = 0;
+         check >> columnCount;
+         check.close();
+         return columnCount;
+
+     }
+
+     bool checkFileExistance(string fileName)// tells file is present on disk or not
+     {
+         ifstream check;
+         check.open(fileName);
+         if (check.is_open())
+         {
+             check.close();
+             return true;
+         }
+         else
+         {
+             check.close();
+             return false;
+         }
+     }
+
+     string extractInsertTableName(string query)// extract table name from insert table query
+     {
+         int i = 0;
+
+         string tableName;
+         while (query[i] != 0)
+         {
+             if (i > 11)
+             {
+                 while (query[i] != ' ')
+                 {
+                     if (query[i] == '(')
+                     {
+                         break;
+                     }
+                     tableName.push_back(query[i]);
+                     i++;
+                 }
+                 break;
+             }
+             i++;
+         }
+
+         tableName.push_back('\0');
+         return tableName;
+     }
+
+
+
+     bool insertSyntax(string temp) // check syntax for keyword insert into
+     {
+         string checker = temp.substr(0, 11);
+         string toCompare = "insert into";
+
+         if (checker.compare(toCompare) == 0)
+         {
+             return true;
+         }
+         else
+         {
+             return false;
+         }
+
+     }
+
+     bool goBack() // use to control program control
+     {
+         cout << "\nPress Y \n";
+         char ch;
+         while (true)
+         {
+             cin >> ch;
+             if (tolower(ch) == 'y')
+             {
+                 return true;
+             }
+         }
+     }
+
+
+     void displayFields(string arr[], int size, string schemaFile) //get file name and size mean attributes-nums
+     {//and writes it in the start of file help ease in reading
+         fstream schema;// writing attributes names and size on schema file
+         schema.open(schemaFile, ios::in | ios::out | ios::app);
+         if (schema.is_open())
+         {
+             schema << size << endl;
+             for (int i = 0; i < size; i++)
+             {
+                 cout << arr[i] << "  ";
+                 schema << arr[i] << endl;
+             }
+             schema.close();
+         }
+     }
+
+
+     int countAttributes(string query)// return num of attributes your query contains
+     {
+         int count = 1, i = 0;
+         while (query[i] != '\0')
+         {
+             if (query[i] == '(')
+             {
+                 while (query[i] != ')')
+                 {
+                     if (query[i] == ',')
+                     {
+                         count++;
+                     }
+                     i++;
+                 }
+                 break;
+             }
+             i++;
+         }
+         if (count > 1)
+         {
+             return count;
+         }
+         else
+         {
+             return -1;
+         }
+     }
+
+
+     string extractTableName(string query) // return table name from query by text parsing
+     {
+         int i = 0;
+
+         string tableName;
+         while (query[i] != 0)
+         {
+             if (i > 12)
+             {
+                 while (query[i] != ' ')
+                 {
+                     if (query[i] == '(')
+                     {
+                         break;
+                     }
+                     tableName.push_back(query[i]);
+                     i++;
+                 }
+                 break;
+             }
+             i++;
+         }
+
+         tableName.push_back('\0');
+         return tableName;
+     }
+
+
+
+     bool createSyntax(string temp) // manage create table keyword syntax
+     {
+         string checker = temp.substr(0, 12);
+         string toCompare = "create table";
+
+         if (checker.compare(toCompare) == 0)
+         {
+             return true;
+         }
+         else
+         {
+             return false;
+         }
+
+     }
+
+
+     bool filterQuery(string& temp) // terminate extra spaces in query to filter it 
+     {
+         int semicolonIndex = 0;
+         semicolonIndex = temp.length();
+         semicolonIndex--;
+         if (temp[semicolonIndex] == ';')
+         {
+             if (temp.length() > 18)
+             {
+                 string filter;
+                 int i = 0;;
+                 while (temp[i] != 0)
+                 {
+                     if (temp[i] != ' ')
+                     {
+                         filter.push_back(tolower(temp[i]));
+                     }
+                     else if (temp[i] == ' ' && temp[i + 1] != ' ' && temp[i + 1] != ';')
+                     {
+                         filter.push_back(' ');
+                     }
+                     i++;
+                 }
+                 filter.push_back('\0');
+                 temp = filter;
+                 return false;
+
+             }
+             else
+             {
+                 cout << "Invalid-Query" << endl;
+                 return true;
+             }
+         }
+         else
+         {
+             cout << " ';' Expected at end " << endl;
+             return true;
+         }
+     }
+
+
+};
+
+class creation : public helpingFunctions
+{
+    protected:
+    string query;
+    string* fields;
+    public:
+
+    void createTable()
+    {
+        while (true)
+        {
+            system("cls");
+            bool flag = true;
+            while (flag)
+            {
+                createTablePannel();
+                cout << "Enter Query" << endl;
+                getline(cin, query);
+                flag = filterQuery(query);
+                if (flag == true)
+                {
+                    Sleep(3000);
+                    system("cls");
+                    continue;
+                }
+            }
+            if (createSyntax(query))
+            {
+                int count = countAttributes(query);
+
+                if (count <= 5 && count >= 2)
+                {
+                    fields = new string[count];
+                    extractTableAttributes(query, fields);
+                    string tableName = extractTableName(query);
+                    bool flag = createDB(count, tableName);
+                    if (flag)
+                    {
+                        cout << "TABLE " << tableName << " SUCCESSFULLY CREATED WITH " << count << " ATTRIBUTES " << endl;
+                        displayFields(fields, count, tableName);
+                        break;
+                    }
+                    else
+                    {
+
+                        cout << "something-went-wrong...!" << endl;
+                        Sleep(2000);
+                        system("cls");
+                        cout << "Sorry for inconvinience" << endl;
+                        cout << "TRY AGAIN" << endl;
+                        cout << "REFRESHING";
+                        Sleep(3000);
+                        system("cls");
+                        continue;
+
+                    }
+                }
+                else
+                {
+                    cout << "NOTE:'Attributes can't be < 2 and > 5' " << endl;
+                    Sleep(2000);
+                    cout << "Enter again" << endl;
+                    cout << "Refreshing...";
+                    Sleep(1000);
+                    continue;
+                }
+
+            }
+            else
+            {
+                cout << " SYNTAX-ERROR=> check-> 'CREATE-TABLE' <-check " << endl;
+                Sleep(2000);
+                cout << "Enter again" << endl;
+                cout << "Refreshing...";
+                Sleep(1000);
+                continue;
+            }
+
+
+        }//end of outer while
+
+    }// end of function
+   
+
+};
+class insertion : public helpingFunctions
+{
+    string row, row2, row3, row4, row5;
+    string query;
+    string* fields;
+    string tableName;
+    int columnCount = 0;
+    public:
+    void insertInTable()
+    {
+        while (true)
+        {
+            system("cls");
+            bool flag = true;
+            while (flag)
+            {
+                insertTablePannel();
+                cout << "Enter Query" << endl;
+                getline(cin, query);
+                flag = filterQuery(query);
+                if (flag == true)
+                {
+                    Sleep(3000);
+                    system("cls");
+                    continue;
+                }
+            }
+            if (insertSyntax(query))
+            {
+                tableName = extractInsertTableName(query);
+                tableName += ".dat";
+                if (checkFileExistance(tableName))
+                {
+                    columnCount = extractColumCount(tableName);
+                    int values = countAttributes(query);
+                    if (columnCount == 5 && values <= 5)
+                    {
+                        fields = new string[5];
+                        extractTableAttributes(query,fields);
+                        for (int i = 0; i < 5; i++)
+                        {
+                            if (i >= values)
+                            {
+                                fields[i] = "NULL";
+                            }
+                        }
+                        copyInVariable5(fields,row, row2, row3, row4, row5);
+                        ofstream write;
+                        write.open(tableName, ios::out|ios::app);
+                        write.seekp(6);
+                        if (write.is_open())
+                        {
+                            write << row << "\t" << row2 << "\t" << row3 << "\t" << row4 << "\t" << row5 << endl;
+                            cout << "1 row affected";
+                            write.close();
+                            Sleep(2000);
+                            system("cls");
+                            break;
+                        }
+                        else
+                        {
+                            write.close();
+                            cout << "warning:'something went wrong " << endl;
+                            system("cls");
+                            continue;
+                        }
+     
+                    }//5 column if end
+                    else if (columnCount == 4 && values <= 4)
+                    {
+                        fields = new string[4];
+                        extractTableAttributes(query, fields);
+                        for (int i = 0; i < 4; i++)
+                        {
+                            if (i >= values)
+                            {
+                                fields[i] = "NULL";
+                            }
+                        }
+                        copyInVariable5(fields, row, row2, row3, row4);
+                        ofstream write;
+                        write.open(tableName, ios::out | ios::app);
+                        write.seekp(5);
+                        if (write.is_open())
+                        {
+                            write << row << "\t" << row2 << "\t" << row3 << "\t" << row4 << endl;
+                            cout << "1 row affected";
+                            write.close();
+                            Sleep(2000);
+                            system("cls");
+                            break;
+                        }
+                        else
+                        {
+                            write.close();
+                            cout << "warning:'something went wrong " << endl;
+                            system("cls");
+                            continue;
+                        }
+                    }//4-col-end
+                    else if (columnCount == 3 && values <= 3)
+                    {
+                        fields = new string[3];
+                        extractTableAttributes(query, fields);
+                        for (int i = 0; i < 3; i++)
+                        {
+                            if (i >= values)
+                            {
+                                fields[i] = "NULL";
+                            }
+                        }
+                        copyInVariable5(fields, row, row2, row3);
+                        ofstream write;
+                        write.open(tableName, ios::out | ios::app);
+                        write.seekp(4);
+                        if (write.is_open())
+                        {
+                            write << row << "\t" << row2 << "\t" << row3 << endl;
+                            cout << "1 row affected";
+                            write.close();
+                            Sleep(2000);
+                            system("cls");
+                            break;
+                        }
+                        else
+                        {
+                            write.close();
+                            cout << "warning:'something went wrong " << endl;
+                            system("cls");
+                            continue;
+                        }
+                    }//3-col-end
+                    else if (columnCount == 2 && values <= 2)
+                    {
+                        fields = new string[2];
+                        extractTableAttributes(query, fields);
+                        for (int i = 0; i < 2; i++)
+                        {
+                            if (i >= values)
+                            {
+                                fields[i] = "NULL";
+                            }
+                        }
+                        copyInVariable2(fields, row, row2);
+                        ofstream write;
+                        write.open(tableName, ios::out | ios::app);
+                        write.seekp(3);
+                        if (write.is_open())
+                        {
+                            write << row << "\t" << row2 << endl;
+                            cout << "1 row affected";
+                            write.close();
+                            Sleep(2000);
+                            system("cls");
+                            break;
+                        }
+                        else
+                        {
+                            write.close();
+                            cout << "warning:'something went wrong " << endl;
+                            system("cls");
+
+                        }
+                    }
+
+
+
+                }
+                else
+                {
+                    cout << "SORRY:'NO SUCH TYPE OF TABLE EXIST' " << endl;
+                    Sleep(2000);
+                    cout << "SOLUTION:'CHECK TABLE NAME || GO BACK AND CREATE TABLE" << endl;
+                    Sleep(3000);
+                    break;
+                }
+
+            }
+            else
+            {
+
+                cout << "SYNTAX-ERROR:check--> 'INSERT INTO' <---check " << endl;
+                Sleep(3000);
+                cout << "Enter again" << endl;
+                cout << "Refreshing...";
+                Sleep(1000);
+                continue;
+            }
+
+        }
+
+    }// end of function
+};
+
+class preMain : public helpingFunctions
+{
+   public:
+       preMain()
+       {
+           start:
+           char choice = tolower(projectInterface()); // easy to handle
+           if (choice == 'a')
+           {
+               creation obj;
+               obj.createTable();
+               if (goBack())
+               {
+                   system("cls");
+                   goto start;
+               }
+           }
+           else if (choice == 'b')
+           {
+               insertion obj;
+               obj.insertInTable();
+               if (goBack())
+               {
+                   system("cls");
+                   goto start;
+               }
+           }
+           else if (choice == 'c')
+           {
+               fstream r;
+               cout << "name:";
+               string name;
+               cin >> name;
+               name += ".dat";
+               cout << "table name " << name;
+               r.open(name, ios::in);
+               if (r.is_open())
+               {
+                   cout << "open";
+                   string temp;
+                   while ( !r.eof())
+                   {
+                       getline(r, temp);
+                       cout << temp << endl; 
+                   }
+               }
+               else
+               {
+                   cout << "\nfile opening error";
+               }
+           }
+         
+       }
+
+};
+   
+
+int main()
+{
+    preMain obj;
+    return 0;
+}
+
+
+
+
+
+char  projectInterface()
+{
+    cout << endl;
+    cout << endl;
+    cout << "\t\t\t\t\t\t_____CRUD_DBMS_____" << endl;
+    cout << endl;
+    cout << "\t\t\t\t ___________________________________________________" << endl;
+    cout << "\t\t\t\t|\t\t\t\t\t\t    |" << endl;
+    cout << "\t\t\t\t| \t A: To To Create Table \t\t\t    |" << endl;
+    cout << "\t\t\t\t|\t\t\t\t\t\t    |" << endl;
+    cout << "\t\t\t\t| \t B:To Insert Data \t\t\t    |" << endl;
+    cout << "\t\t\t\t|\t\t\t\t\t\t    |" << endl;
+    cout << "\t\t\t\t| \t C:To Apply Queries \t\t\t    |" << endl;
+    cout << "\t\t\t\t|\t\t\t\t\t\t    |" << endl;
+    cout << "\t\t\t\t| \t D:To Exit \t\t\t\t    |" << endl;
+    cout << "\t\t\t\t|\t\t\t\t\t\t    |" << endl;
+    cout << "\t\t\t\t ---------------------------------------------------" << endl;
+    for (int i = 0; i < 3; i++)
+    {
+        cout << endl;
+    }
+    char choice;
+    do// use to control user-flow
+    {
+        cout << "Enter one of the choice : ";
+        cin >> choice;
+        cin.ignore();
+    } while (!choices(choice));
+    if (toupper(choice))
+    {
+        choice = tolower(choice);
+    }
+    return choice;
+}
+
+bool choices(char temp) // for inter-Face
+{
+    if (toupper(temp))
+    {
+       temp = tolower(temp);
+    }
+  
+    if (temp == 'a' || temp == 'b' || temp == 'c' || temp == 'd')
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+} ;
